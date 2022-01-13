@@ -43,7 +43,8 @@ class SubsidyController @Inject()(
                                    reportPaymentPage: ReportPaymentPage,
                                    addClaimEoriPage: AddClaimEoriPage,
                                    addClaimAmountPage: AddClaimAmountPage,
-                                   addClaimDatePage: AddClaimDatePage
+                                   addClaimDatePage: AddClaimDatePage,
+                                   addPublicAuthorityPage: AddPublicAuthorityPage
 )(
   implicit val appConfig: AppConfig,
   executionContext: ExecutionContext
@@ -191,6 +192,41 @@ class SubsidyController @Inject()(
     }
   }
 
+  def getAddClaimPublicAuthority: Action[AnyContent] = escAuthentication.async { implicit request =>
+    implicit val eori: EORI = request.eoriNumber
+    store.get[SubsidyJourney].flatMap {
+      case Some(journey) =>
+        journey
+          .publicAuthority
+          .value
+          .fold(
+            Future.successful(
+              Ok(addPublicAuthorityPage(claimPublicAuthorityForm))
+            )
+          ) { x =>
+            Future.successful(
+              Ok(addPublicAuthorityPage(claimPublicAuthorityForm.fill(x)))
+            )
+          }
+    }
+  }
+
+  def postAddClaimPublicAuthority: Action[AnyContent] = escAuthentication.async { implicit request =>
+    implicit val eori: EORI = request.eoriNumber
+    getPrevious[SubsidyJourney](store).flatMap { previous =>
+      claimPublicAuthorityForm.bindFromRequest().fold(
+        errors => Future.successful(BadRequest(addClaimEoriPage(errors))),
+        form => {
+          store.update[SubsidyJourney]({ x =>
+            x.map { y =>
+              y.copy(publicAuthority = y.publicAuthority.copy(value = Some(form)))
+            }
+          }).flatMap(_.next)
+        }
+      )
+    }
+  }
+
   lazy val reportPaymentForm: Form[FormValues] = Form(
     mapping("reportPayment" -> mandatory("reportPayment"))(FormValues.apply)(FormValues.unapply))
 
@@ -203,6 +239,10 @@ class SubsidyController @Inject()(
       a => if (a.setValue == "false") a.copy(value = None) else a,
       b => b
     )
+  )
+
+  lazy val claimPublicAuthorityForm: Form[String] = Form(
+    "claim-public-authority" -> mandatory("claim-public-authority")
   )
 
   lazy val claimAmountForm : Form[BigDecimal] = Form( mapping("claim-amount" -> bigDecimal)(identity)(Some(_)))

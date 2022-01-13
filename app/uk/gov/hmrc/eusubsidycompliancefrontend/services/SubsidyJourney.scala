@@ -30,7 +30,7 @@ case class SubsidyJourney(
   claimAmount: FormPage[BigDecimal] = FormPage("add-claim-amount"),
   addClaimEori: FormPage[Option[EORI]] = FormPage("add-claim-eori"),
   publicAuthority: FormPage[String] = FormPage("add-claim-public-authority"),
-//  traderRef: FormPage[Option[TraderRef]] = FormPage("add-claim-reference"),
+  traderRef: FormPage[Option[TraderRef]] = FormPage("add-claim-reference"),
 //  cya: FormPage[Boolean] = FormPage("check-your-answers")
 ) extends Journey {
 
