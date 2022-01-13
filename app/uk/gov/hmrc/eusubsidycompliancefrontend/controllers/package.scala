@@ -69,7 +69,10 @@ package object controllers {
     )
   )
 
-
+  case class OptionalEORI(
+    setValue: String,
+    value: Option[String]
+  )
 
   def getPrevious[A <: Journey : ClassTag](
     store: Store

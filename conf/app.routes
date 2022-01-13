@@ -60,3 +60,9 @@ POST       /check-your-answers-businesses     uk.gov.hmrc.eusubsidycompliancefro
 GET        /change/:eori                      uk.gov.hmrc.eusubsidycompliancefrontend.controllers.BusinessEntityController.editBusinessEntity(eori)
 GET        /remove/:eori                      uk.gov.hmrc.eusubsidycompliancefrontend.controllers.BusinessEntityController.getRemoveBusinessEntity(eori)
 POST       /remove/:eori                      uk.gov.hmrc.eusubsidycompliancefrontend.controllers.BusinessEntityController.postRemoveBusinessEntity(eori)
+
+GET        /claims                            uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.getReportPayment
+POST       /claims                            uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.postReportPayment
+
+GET        /add-claim-eori                    uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.getAddClaimEori
+POST       /add-claim-eori                    uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.postAddClaimEori
