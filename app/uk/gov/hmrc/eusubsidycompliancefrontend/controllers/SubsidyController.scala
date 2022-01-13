@@ -25,7 +25,7 @@ import uk.gov.hmrc.eusubsidycompliancefrontend.actions.EscActionBuilders
 import uk.gov.hmrc.eusubsidycompliancefrontend.config.AppConfig
 import uk.gov.hmrc.eusubsidycompliancefrontend.connectors.EscConnector
 import uk.gov.hmrc.eusubsidycompliancefrontend.models.DateFormValues
-import uk.gov.hmrc.eusubsidycompliancefrontend.models.types.EORI
+import uk.gov.hmrc.eusubsidycompliancefrontend.models.types.{EORI, TraderRef}
 import uk.gov.hmrc.eusubsidycompliancefrontend.services.{EligibilityJourney, Store, SubsidyJourney, UndertakingJourney}
 import uk.gov.hmrc.eusubsidycompliancefrontend.views.html._
 
@@ -44,7 +44,8 @@ class SubsidyController @Inject()(
                                    addClaimEoriPage: AddClaimEoriPage,
                                    addClaimAmountPage: AddClaimAmountPage,
                                    addClaimDatePage: AddClaimDatePage,
-                                   addPublicAuthorityPage: AddPublicAuthorityPage
+                                   addPublicAuthorityPage: AddPublicAuthorityPage,
+                                   addTraderReferencePage: AddTraderReferencePage
 )(
   implicit val appConfig: AppConfig,
   executionContext: ExecutionContext
@@ -112,7 +113,7 @@ class SubsidyController @Inject()(
   def postAddClaimAmount: Action[AnyContent] = escAuthentication.async { implicit request =>
     implicit val eori: EORI = request.eoriNumber
     claimAmountForm.bindFromRequest().fold(
-      _ => throw new IllegalStateException("value hard-coded, form hacking?"),
+      formWithErrors => Future.successful(BadRequest(addClaimAmountPage(formWithErrors))),
       form => {
         store.update[SubsidyJourney]({ x =>
           x.map { y =>
@@ -180,7 +181,7 @@ class SubsidyController @Inject()(
     implicit val eori: EORI = request.eoriNumber
     getPrevious[SubsidyJourney](store).flatMap { previous =>
       claimEoriForm.bindFromRequest().fold(
-        errors => Future.successful(BadRequest(addClaimEoriPage(errors))),
+        formWithErrors => Future.successful(BadRequest(addClaimEoriPage(formWithErrors))),
         form => {
           store.update[SubsidyJourney]({ x =>
             x.map { y =>
@@ -215,11 +216,47 @@ class SubsidyController @Inject()(
     implicit val eori: EORI = request.eoriNumber
     getPrevious[SubsidyJourney](store).flatMap { previous =>
       claimPublicAuthorityForm.bindFromRequest().fold(
-        errors => Future.successful(BadRequest(addClaimEoriPage(errors))),
+        errors => Future.successful(BadRequest(addPublicAuthorityPage(errors))),
         form => {
           store.update[SubsidyJourney]({ x =>
             x.map { y =>
               y.copy(publicAuthority = y.publicAuthority.copy(value = Some(form)))
+            }
+          }).flatMap(_.next)
+        }
+      )
+    }
+  }
+
+  def getAddClaimReference: Action[AnyContent] = escAuthentication.async { implicit request =>
+    implicit val eori: EORI = request.eoriNumber
+    store.get[SubsidyJourney].flatMap {
+      case Some(journey) =>
+        journey
+          .traderRef
+          .value
+          .fold(
+            Future.successful(
+              Ok(addTraderReferencePage(claimTraderRefForm))
+            )
+          ) { x =>
+            val a = x.fold("false")(_ => "true")
+            Future.successful(
+              Ok(addTraderReferencePage(claimTraderRefForm.fill(OptionalTraderRef(a,x))))
+            )
+          }
+    }
+  }
+
+  def postAddClaimReference: Action[AnyContent] = escAuthentication.async { implicit request =>
+    implicit val eori: EORI = request.eoriNumber
+    getPrevious[SubsidyJourney](store).flatMap { previous =>
+      claimTraderRefForm.bindFromRequest().fold(
+        errors => Future.successful(BadRequest(addTraderReferencePage(errors))),
+        form => {
+          store.update[SubsidyJourney]({ x =>
+            x.map { y =>
+              y.copy(traderRef = y.traderRef.copy(value = Some(form.value.map(TraderRef(_)))))
             }
           }).flatMap(_.next)
         }
@@ -236,6 +273,16 @@ class SubsidyController @Inject()(
       "should-claim-eori" -> mandatory("should-claim-eori"),
       "claim-eori" -> optional(text)
     )(OptionalEORI.apply)(OptionalEORI.unapply).transform[OptionalEORI](
+      a => if (a.setValue == "false") a.copy(value = None) else a,
+      b => b
+    )
+  )
+
+  val claimTraderRefForm: Form[OptionalTraderRef] = Form(
+    mapping(
+      "should-store-trader-ref" -> mandatory("should-claim-eori"),
+      "claim-trader-ref" -> optional(text)
+    )(OptionalTraderRef.apply)(OptionalTraderRef.unapply).transform[OptionalTraderRef](
       a => if (a.setValue == "false") a.copy(value = None) else a,
       b => b
     )

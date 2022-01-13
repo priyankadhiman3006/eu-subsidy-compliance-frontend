@@ -51,6 +51,25 @@ object SubsidyJourney {
   implicit val formPageClaimDateFormat: OFormat[FormPage[DateFormValues]] =
     Json.format[FormPage[DateFormValues]]
 
+  implicit val formPageAddTraderReferenceFormat: Format[FormPage[Option[TraderRef]]] = new Format[FormPage[Option[TraderRef]]] {
+
+    override def writes(o: FormPage[Option[TraderRef]]): JsValue = {
+      val traderRefOpt: JsValue = o.value.flatten match {
+        case Some(eori) => JsString(eori)
+        case _ => JsNull
+      }
+      Json.obj(
+        "traderRef" -> traderRefOpt
+      )
+    }
+
+    override def reads(json: JsValue): JsResult[FormPage[Option[TraderRef]]] = {
+      val foo: Option[TraderRef] = (json \ "traderRef").asOpt[TraderRef]
+      val bar = FormPage[Option[TraderRef]]("add-trader-ref", Some(foo))
+      JsSuccess(bar)
+    }
+  }
+
   implicit val formPageAddClaimEoriFormat: Format[FormPage[Option[EORI]]] = new Format[FormPage[Option[EORI]]] {
 
     override def writes(o: FormPage[Option[EORI]]): JsValue = {

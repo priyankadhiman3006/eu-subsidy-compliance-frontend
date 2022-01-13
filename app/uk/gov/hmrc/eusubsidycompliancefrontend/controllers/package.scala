@@ -74,6 +74,11 @@ package object controllers {
     value: Option[String]
   )
 
+  case class OptionalTraderRef(
+     setValue: String,
+     value: Option[String]
+   )
+
   def getPrevious[A <: Journey : ClassTag](
     store: Store
   )(

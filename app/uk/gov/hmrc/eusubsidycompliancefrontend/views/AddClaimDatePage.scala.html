@@ -40,15 +40,30 @@
     backLink = None
 ) {
 
-    <h1>Sam debug</h1>
-
     @* TODO error summary and field errors *@
+    @if(form.hasErrors) {
+        @govukErrorSummary(
+            ErrorSummary(
+                errorList = form.errors.map { err =>
+                    ErrorLink(
+                        href = Some(s"#${err.key}"),
+                        content = Text(s"${messages(err.message)}"),
+                        attributes = Map("class" ->"govuk-link")
+                    )
+                },
+                title = Text(messages("common.error.summary.title"))
+            )
+        )
+    }
 
     @formHelper(action = controllers.routes.SubsidyController.postClaimDate()) {
 
       <h1 class="govuk-heading-xl">Add an eori or not ... TODO</h1>
         @govukDateInput(DateInput(
             id = "claim-date",
+            errorMessage = if (form.hasErrors) {
+                Some(ErrorMessage(content = Text(messages(form.errors.head.message))))
+            } else None,
             items = Seq(
                 InputItem(
                     name = "day",

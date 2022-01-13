@@ -76,5 +76,5 @@ POST       /add-claim-date                    uk.gov.hmrc.eusubsidycompliancefro
 GET        /add-claim-public-authority        uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.getAddClaimPublicAuthority
 POST       /add-claim-public-authority        uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.postAddClaimPublicAuthority
 
-GET        /add-claim-reference               uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.getAddClaimReference
-POST       /add-claim-reference               uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.getPostClaimReference
+GET        /add-trader-ref               uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.getAddClaimReference
+POST       /add-trader-ref               uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.postAddClaimReference
