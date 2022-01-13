@@ -31,7 +31,7 @@ case class SubsidyJourney(
   addClaimEori: FormPage[Option[EORI]] = FormPage("add-claim-eori"),
   publicAuthority: FormPage[String] = FormPage("add-claim-public-authority"),
   traderRef: FormPage[Option[TraderRef]] = FormPage("add-claim-reference"),
-//  cya: FormPage[Boolean] = FormPage("check-your-answers")
+  cya: FormPage[Boolean] = FormPage("check-your-answers-subsidy")
 ) extends Journey {
 
   override def steps: List[Option[FormPage[_]]] =

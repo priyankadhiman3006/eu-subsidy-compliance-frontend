@@ -45,7 +45,8 @@ class SubsidyController @Inject()(
                                    addClaimAmountPage: AddClaimAmountPage,
                                    addClaimDatePage: AddClaimDatePage,
                                    addPublicAuthorityPage: AddPublicAuthorityPage,
-                                   addTraderReferencePage: AddTraderReferencePage
+                                   addTraderReferencePage: AddTraderReferencePage,
+                                   cyaPage: ClaimCheckYourAnswerPage
 )(
   implicit val appConfig: AppConfig,
   executionContext: ExecutionContext
@@ -264,6 +265,44 @@ class SubsidyController @Inject()(
     }
   }
 
+  def getCheckAnswers: Action[AnyContent] = escAuthentication.async { implicit request =>
+    implicit val eori: EORI = request.eoriNumber
+    store.get[SubsidyJourney].flatMap {
+      case Some(journey) =>
+        Future.successful(
+          Ok(
+            cyaPage(
+              journey.claimDate.value.getOrElse(throw new IllegalStateException("Claim date should be defined")),
+              journey.claimAmount.value.getOrElse(throw new IllegalStateException("Claim amount payment should be defined")),
+              journey.addClaimEori.value.getOrElse(throw new IllegalStateException("Claim EORI payment should be defined")),
+              journey.publicAuthority.value.getOrElse(throw new IllegalStateException("Public Authority payment should be defined")),
+              journey.traderRef.value.getOrElse(throw new IllegalStateException("Trader Reference payment should be defined"))
+            )
+          )
+        )
+    }
+  }
+  def postCheckAnswers: Action[AnyContent] = escAuthentication.async { implicit request =>
+    implicit val eori: EORI = request.eoriNumber
+    cyaForm.bindFromRequest().fold(
+      _ => throw new IllegalStateException("value hard-coded, form hacking?"),
+      form => {
+        store.update[SubsidyJourney]({ x =>
+          x.map { y =>
+            y.copy(cya = y.cya.copy(value = Some(form.value.toBoolean)))
+          }
+        })
+          .flatMap { journey: SubsidyJourney =>
+            for {
+              a <- Future.successful(4)//stub for connector stuff
+            } yield {
+              Ok("Dun")
+            }
+          }
+      }
+    )
+  }
+
   lazy val reportPaymentForm: Form[FormValues] = Form(
     mapping("reportPayment" -> mandatory("reportPayment"))(FormValues.apply)(FormValues.unapply))
 
@@ -298,5 +337,8 @@ class SubsidyController @Inject()(
     DateFormValues.vatRegDateMapping
       .verifying("error.date.invalid", a =>  a.isValidDate)
   )
+
+  lazy val cyaForm: Form[FormValues] = Form(
+    mapping("cya" -> mandatory("cya"))(FormValues.apply)(FormValues.unapply))
 
 }
