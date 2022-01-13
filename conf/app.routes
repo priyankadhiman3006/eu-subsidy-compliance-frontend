@@ -66,3 +66,12 @@ POST       /claims                            uk.gov.hmrc.eusubsidycompliancefro
 
 GET        /add-claim-eori                    uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.getAddClaimEori
 POST       /add-claim-eori                    uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.postAddClaimEori
+
+GET        /add-claim-amount                  uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.getClaimAmount
+POST       /add-claim-amount                  uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.postAddClaimAmount
+
+GET        /add-claim-date                    uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.getClaimDate
+POST       /add-claim-date                    uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.postClaimDate
+
+GET        /add-claim-public-authority        uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.getClaimPublicAuthority
+POST       /add-claim-public-authority        uk.gov.hmrc.eusubsidycompliancefrontend.controllers.SubsidyController.postClaimPublicAuthority

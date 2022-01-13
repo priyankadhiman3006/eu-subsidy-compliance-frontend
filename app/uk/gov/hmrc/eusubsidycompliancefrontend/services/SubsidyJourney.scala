@@ -22,13 +22,14 @@ import play.api.libs.json._
 import shapeless.syntax.std.tuple._
 import shapeless.syntax.typeable._
 import uk.gov.hmrc.eusubsidycompliancefrontend.models.types.{EORI, TraderRef}
+import uk.gov.hmrc.eusubsidycompliancefrontend.models.DateFormValues
 
 case class SubsidyJourney(
   reportPayment: FormPage[Boolean] = FormPage("claims"),
-//  claimDate: FormPage[LocalDate] = FormPage("add-claim-date"),
-//  claimAmount: FormPage[BigDecimal] = FormPage("add-claim-amount"),
+  claimDate: FormPage[DateFormValues] = FormPage("add-claim-date"),
+  claimAmount: FormPage[BigDecimal] = FormPage("add-claim-amount"),
   addClaimEori: FormPage[Option[EORI]] = FormPage("add-claim-eori"),
-//  publicAuthority: FormPage[String] = FormPage("add-claim-public-authority"),
+  publicAuthority: FormPage[String] = FormPage("add-claim-public-authority"),
 //  traderRef: FormPage[Option[TraderRef]] = FormPage("add-claim-reference"),
 //  cya: FormPage[Boolean] = FormPage("check-your-answers")
 ) extends Journey {
@@ -47,8 +48,8 @@ object SubsidyJourney {
   import Journey._ // N.B. don't let intellij delete this
   import play.api.libs.functional.syntax._
 
-  implicit val formPageClaimDateFormat: OFormat[FormPage[LocalDate]] =
-    Json.format[FormPage[LocalDate]]
+  implicit val formPageClaimDateFormat: OFormat[FormPage[DateFormValues]] =
+    Json.format[FormPage[DateFormValues]]
 
   implicit val formPageAddClaimEoriFormat: Format[FormPage[Option[EORI]]] = new Format[FormPage[Option[EORI]]] {
 

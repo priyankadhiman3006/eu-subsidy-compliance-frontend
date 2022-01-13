@@ -17,26 +17,33 @@
 package uk.gov.hmrc.eusubsidycompliancefrontend.controllers
 
 import javax.inject.{Inject, Singleton}
-import play.api.data.Form
-import play.api.data.Forms.{mapping, optional, text}
+import play.api.data.{Form, Mapping}
+import play.api.data.Forms.{bigDecimal, date, mapping, optional, single, text, tuple}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.eusubsidycompliancefrontend.actions.EscActionBuilders
 import uk.gov.hmrc.eusubsidycompliancefrontend.config.AppConfig
 import uk.gov.hmrc.eusubsidycompliancefrontend.connectors.EscConnector
+import uk.gov.hmrc.eusubsidycompliancefrontend.models.DateFormValues
 import uk.gov.hmrc.eusubsidycompliancefrontend.models.types.EORI
 import uk.gov.hmrc.eusubsidycompliancefrontend.services.{EligibilityJourney, Store, SubsidyJourney, UndertakingJourney}
 import uk.gov.hmrc.eusubsidycompliancefrontend.views.html._
 
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, ZoneId}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 @Singleton
 class SubsidyController @Inject()(
-  mcc: MessagesControllerComponents,
-  escActionBuilders: EscActionBuilders,
-  store: Store,
-  connector: EscConnector,
-  reportPaymentPage: ReportPaymentPage,
-  addClaimEoriPage: AddClaimEoriPage
+                                   mcc: MessagesControllerComponents,
+                                   escActionBuilders: EscActionBuilders,
+                                   store: Store,
+                                   connector: EscConnector,
+                                   reportPaymentPage: ReportPaymentPage,
+                                   addClaimEoriPage: AddClaimEoriPage,
+                                   addClaimAmountPage: AddClaimAmountPage,
+                                   addClaimDatePage: AddClaimDatePage
 )(
   implicit val appConfig: AppConfig,
   executionContext: ExecutionContext
@@ -76,6 +83,72 @@ class SubsidyController @Inject()(
         store.update[SubsidyJourney]({ x =>
           x.map { y =>
             y.copy(reportPayment = y.reportPayment.copy(value = Some(form.value.toBoolean)))
+          }
+        }).flatMap(_.next)
+      }
+    )
+  }
+
+  def getClaimAmount: Action[AnyContent] = escAuthentication.async { implicit request =>
+    implicit val eori: EORI = request.eoriNumber
+    store.get[SubsidyJourney].flatMap {
+      case Some(journey) =>
+        journey
+          .claimAmount
+          .value
+          .fold(
+            Future.successful(
+              Ok(addClaimAmountPage(claimAmountForm))
+            )
+          ) { x =>
+            Future.successful(
+              Ok(addClaimAmountPage(claimAmountForm.fill(x)))
+            )
+          }
+    }
+  }
+
+  def postAddClaimAmount: Action[AnyContent] = escAuthentication.async { implicit request =>
+    implicit val eori: EORI = request.eoriNumber
+    claimAmountForm.bindFromRequest().fold(
+      _ => throw new IllegalStateException("value hard-coded, form hacking?"),
+      form => {
+        store.update[SubsidyJourney]({ x =>
+          x.map { y =>
+            y.copy(claimAmount = y.claimAmount.copy(value = Some(form)))
+          }
+        }).flatMap(_.next)
+      }
+    )
+  }
+
+  def getClaimDate: Action[AnyContent] = escAuthentication.async { implicit request =>
+    implicit val eori: EORI = request.eoriNumber
+    store.get[SubsidyJourney].flatMap {
+      case Some(journey) =>
+        journey
+          .claimDate
+          .value
+          .fold(
+            Future.successful(
+              Ok(addClaimDatePage(claimDateForm))
+            )
+          ) { x =>
+            Future.successful(
+              Ok(addClaimDatePage(claimDateForm.fill(x)))
+            )
+          }
+    }
+  }
+
+  def postClaimDate: Action[AnyContent] = escAuthentication.async { implicit request =>
+    implicit val eori: EORI = request.eoriNumber
+    claimDateForm.bindFromRequest().fold(
+      formWithErrors => Future(BadRequest(addClaimDatePage(formWithErrors))),
+      form => {
+        store.update[SubsidyJourney]({ x =>
+          x.map { y =>
+            y.copy(claimDate = y.claimDate.copy(value = Some(form)))
           }
         }).flatMap(_.next)
       }
@@ -130,6 +203,13 @@ class SubsidyController @Inject()(
       a => if (a.setValue == "false") a.copy(value = None) else a,
       b => b
     )
+  )
+
+  lazy val claimAmountForm : Form[BigDecimal] = Form( mapping("claim-amount" -> bigDecimal)(identity)(Some(_)))
+
+  lazy val claimDateForm : Form[DateFormValues] = Form(
+    DateFormValues.vatRegDateMapping
+      .verifying("error.date.invalid", a =>  a.isValidDate)
   )
 
 }
