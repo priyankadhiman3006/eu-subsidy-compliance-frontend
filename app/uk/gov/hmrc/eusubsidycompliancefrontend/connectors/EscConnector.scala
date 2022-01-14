@@ -100,19 +100,19 @@ class EscConnector @Inject()(
   }
 
   def updateSubsidy() ={
-    SubsidyUpdate(UndertakingSubsidyAmendment(
-      List(
-        SubsidyUpdate(
-          subsidyUsageTransactionId = None,
-          allocationDate = LocalDate,
-          submissionDate= LocalDate.now(),
-          publicAuthority = Option[String], // this shouldn't be optional, is required in create API but not retrieve
-          traderReference = Option[TraderRef],
-          nonHMRCSubsidyAmtEUR = SubsidyAmount,
-          businessEntityIdentifier = Option[EORI],
-          amendmentType = "1"//todo - change
-        )
-      )
-    ))
+    ???
+  // SubsidyUpdate(UndertakingSubsidyAmendment( List(
+  //     SubsidyUpdate(
+  //       subsidyUsageTransactionId = None,
+  //       allocationDate = LocalDate,
+  //       submissionDate= LocalDate.now(),
+  //       publicAuthority = Option[String], // this shouldn't be optional, is required in create API but not retrieve
+  //       traderReference = Option[TraderRef],
+  //       nonHMRCSubsidyAmtEUR = SubsidyAmount,
+  //       businessEntityIdentifier = Option[EORI],
+  //       amendmentType = "1"//todo - change
+  //     )
+  //   )
+  // ))
   }
 }

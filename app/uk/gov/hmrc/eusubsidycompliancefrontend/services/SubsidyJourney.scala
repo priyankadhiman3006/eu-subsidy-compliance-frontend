@@ -40,8 +40,6 @@ case class SubsidyJourney(
       .map(_.toList)
       .fold(List.empty[Any])(identity)
       .map(_.cast[FormPage[_]])
-      .map(_.cast[FormPage[_]])
-
 
 }
 

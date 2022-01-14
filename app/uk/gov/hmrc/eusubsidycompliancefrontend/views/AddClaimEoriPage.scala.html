@@ -73,6 +73,8 @@
 
       <h1 class="govuk-heading-xl">Add an eori or not ... TODO</h1>
 
+    @form.data.get("should-claim-eori")
+
       @govukRadios(Radios(
         fieldset = Some(Fieldset(
           legend = Some(Legend(
@@ -93,12 +95,12 @@
           RadioItem(
             content = Text("Yes"),
             value = Some("true"),
-            checked = form.data.exists(_._2 == "true"),
+            checked = form.data.get("should-claim-eori").contains("true"),
             conditionalHtml = Some(textHtml)
           ),
           RadioItem(
             content = Text("No"),
-            checked = form.data.exists(_._2 == "false"),
+            checked = form.data.get("should-claim-eori").contains("false"),
             value = Some("false")
           )
         )

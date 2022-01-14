@@ -171,7 +171,7 @@ class SubsidyController @Inject()(
               Ok(addClaimEoriPage(claimEoriForm))
             )
           ) { x =>
-            val a = x.fold("false")(_ => "true")
+            val a = x.fold("false")(_ => "true") // fix this
             Future.successful(
               Ok(addClaimEoriPage(claimEoriForm.fill(OptionalEORI(a,x))))
             )
@@ -295,7 +295,8 @@ class SubsidyController @Inject()(
         })
           .flatMap { journey: SubsidyJourney =>
             for {
-              a <- connector.u//todo - update stuff
+              //a <- connector.u//todo - update stuff
+              a <- Future.successful(4)
             } yield {
               Ok("Dun")
             }
