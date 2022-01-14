@@ -41,7 +41,8 @@
       content = Text("This can only be a GB EORI TODO use messages")
     ),
     classes = "govuk-!-width-one-third",
-    autocomplete = Some("tel")
+    autocomplete = Some("tel"),
+    value = form.data.get("claim-eori")
   ))
 }
 
@@ -92,10 +93,12 @@
           RadioItem(
             content = Text("Yes"),
             value = Some("true"),
+            checked = form.data.exists(_._2 == "true"),
             conditionalHtml = Some(textHtml)
           ),
           RadioItem(
             content = Text("No"),
+            checked = form.data.exists(_._2 == "false"),
             value = Some("false")
           )
         )
