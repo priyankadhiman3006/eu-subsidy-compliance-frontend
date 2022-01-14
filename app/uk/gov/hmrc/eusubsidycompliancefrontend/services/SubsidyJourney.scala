@@ -40,6 +40,7 @@ case class SubsidyJourney(
       .map(_.toList)
       .fold(List.empty[Any])(identity)
       .map(_.cast[FormPage[_]])
+      .map(_.cast[FormPage[_]])
 
 
 }
@@ -59,6 +60,7 @@ object SubsidyJourney {
         case _ => JsNull
       }
       Json.obj(
+        "uri" -> o.uri,
         "traderRef" -> traderRefOpt
       )
     }
@@ -78,6 +80,7 @@ object SubsidyJourney {
         case _ => JsNull
       }
       Json.obj(
+        "uri" -> o.uri,
         "claimEori" -> eoriOpt
       )
     }

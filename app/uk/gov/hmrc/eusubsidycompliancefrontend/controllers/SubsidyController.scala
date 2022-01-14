@@ -94,6 +94,7 @@ class SubsidyController @Inject()(
 
   def getClaimAmount: Action[AnyContent] = escAuthentication.async { implicit request =>
     implicit val eori: EORI = request.eoriNumber
+    //TODO add 'getPrevious to all'
     store.get[SubsidyJourney].flatMap {
       case Some(journey) =>
         journey
@@ -294,7 +295,7 @@ class SubsidyController @Inject()(
         })
           .flatMap { journey: SubsidyJourney =>
             for {
-              a <- Future.successful(4)//stub for connector stuff
+              a <- connector.u//todo - update stuff
             } yield {
               Ok("Dun")
             }

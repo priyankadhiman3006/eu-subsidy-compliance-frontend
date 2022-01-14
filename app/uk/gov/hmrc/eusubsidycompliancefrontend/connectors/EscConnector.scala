@@ -21,7 +21,7 @@ import cats.implicits._
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{Json, OFormat}
 import play.api.{Logger, Mode}
-import uk.gov.hmrc.eusubsidycompliancefrontend.models.{BusinessEntity, Undertaking}
+import uk.gov.hmrc.eusubsidycompliancefrontend.models.{BusinessEntity, SubsidyUpdate, Undertaking, UndertakingSubsidyAmendment}
 import uk.gov.hmrc.eusubsidycompliancefrontend.models.types.{EORI, UndertakingRef}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -97,5 +97,22 @@ class EscConnector @Inject()(
       s"$escURL/$removeMemberPath/$undertakingRef",
       businessEntity
     )
+  }
+
+  def updateSubsidy() ={
+    SubsidyUpdate(UndertakingSubsidyAmendment(
+      List(
+        SubsidyUpdate(
+          subsidyUsageTransactionId = None,
+          allocationDate = LocalDate,
+          submissionDate= LocalDate.now(),
+          publicAuthority = Option[String], // this shouldn't be optional, is required in create API but not retrieve
+          traderReference = Option[TraderRef],
+          nonHMRCSubsidyAmtEUR = SubsidyAmount,
+          businessEntityIdentifier = Option[EORI],
+          amendmentType = "1"//todo - change
+        )
+      )
+    ))
   }
 }
